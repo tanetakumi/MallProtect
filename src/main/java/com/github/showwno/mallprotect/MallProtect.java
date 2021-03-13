@@ -30,6 +30,7 @@ public class MallProtect extends JavaPlugin{
 
     public void reloadPlugin(){
         HandlerList.unregisterAll();
+        mallConfig.saveLocationsData();
         mallConfig = new MallProtectConfig(this);
         if(mallConfig.getLocationStructureList().size()!=0){
             new ProtectEvent(this);

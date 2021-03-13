@@ -75,37 +75,20 @@ public class ProtectEvent implements Listener {
         }
     }
 
+
     //一か所でもかぶっていれば爆破をキャンセルすることで高速化
     @EventHandler
     public void onEntityExplode(EntityExplodeEvent e) {
-        boolean isInMall = false;
-        for (Block b: e.blockList()) {
-            for(LocationStructure ls : locationStructureList){
-                if(ls.checkLocation(b.getLocation())){
-                    isInMall = true;
-                    break;
-                }
-            }
-        }
-        if(isInMall){
-            e.setCancelled(true);
+        for(LocationStructure ls : locationStructureList){
+            e.blockList().removeIf(b -> ls.checkLocation(b.getLocation()));
         }
     }
 
     //一か所でもかぶっていれば爆破をキャンセルすることで高速化
     @EventHandler
     public void onBlockExplode(BlockExplodeEvent e) {
-        boolean isInMall = false;
-        for (Block b: e.blockList()) {
-            for(LocationStructure ls : locationStructureList){
-                if(ls.checkLocation(b.getLocation())){
-                    isInMall = true;
-                    break;
-                }
-            }
-        }
-        if(isInMall){
-            e.setCancelled(true);
+        for(LocationStructure ls : locationStructureList){
+            e.blockList().removeIf(b -> ls.checkLocation(b.getLocation()));
         }
     }
 }

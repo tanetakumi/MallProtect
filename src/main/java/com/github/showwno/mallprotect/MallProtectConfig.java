@@ -4,10 +4,7 @@ import com.github.showwno.mallprotect.Util.LocationStructure;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MallProtectConfig {
 
@@ -37,10 +34,22 @@ public class MallProtectConfig {
             Location loc1 = locations.get(0).getLocations();
         }*/
 
-        Location loc1 = config.getLocation("mall.loc1");
-        Location loc2 = config.getLocation("mall.loc2");
-        if(loc1!=null && loc2!=null){
-            locationStructureList.add(new LocationStructure(loc1,loc2));
+        //List<Map<?,?>> regions = config.getMapList("region");
+        //config.getConfigurationSection("region").getKeys(false).size();
+        //System.out.println(regions.);
+
+        int num = 0;
+        if(config.contains("region")){
+            num = config.getConfigurationSection("region").getKeys(false).size();
+        }
+
+        for(int i= 0; i<num;i++){
+            String region_name = config.getString("region.region"+i+".name");
+            Location loc1 = config.getLocation("region.region"+i+".loc1");
+            Location loc2 = config.getLocation("region.region"+i+".loc2");
+            if(loc1!=null && loc2!=null){
+                locationStructureList.add(new LocationStructure(region_name,loc1,loc2));
+            }
         }
     }
 
@@ -48,16 +57,17 @@ public class MallProtectConfig {
         return locationStructureList;
     }
 
-    public void saveLocationsData(String arg,Location loc){
+    public void saveLocationsData(){
         /* //複数条件の時
         List<Map<String,Object>> locations ~~~~~~
         for(int i=0;i<locations.size();i++){
             Location loc1 = locations.get(0).getLocations();
         }*/
-        if(arg.equals("loc1")){
-            config.set("mall.loc1",loc);
-        } else if(arg.equals("loc2")){
-            config.set("mall.loc2",loc);
+        config.set("region",null);
+        for(int i= 0; i<locationStructureList.size();i++){
+            config.set("region.region"+i+".name",locationStructureList.get(i).getName());
+            config.set("region.region"+i+".loc1",locationStructureList.get(i).getLoc1());
+            config.set("region.region"+i+".loc2",locationStructureList.get(i).getLoc2());
         }
         plugin.saveConfig();
     }

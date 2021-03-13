@@ -6,8 +6,10 @@ import com.github.showwno.mallprotect.Util.ItemManager;
 import com.github.showwno.mallprotect.Util.LocationStructure;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -23,6 +25,9 @@ public class PrepareEvent implements Listener {
     //Kyori adventure を使用していきたい。
     private final MallProtect plugin;
     private final Player targetPlayer;
+
+    private Location loc1;
+    private Location loc2;
 
     public PrepareEvent(MallProtect plugin, Player player){
         this.plugin = plugin;
@@ -40,15 +45,28 @@ public class PrepareEvent implements Listener {
             if(itemMeta!=null && itemMeta.hasDisplayName()){
                 if(PlainComponentSerializer.plain().serialize(itemMeta.displayName()).equals("Location1")){
                     e.setCancelled(true);
-                    plugin.getMallConfig().saveLocationsData("loc1",e.getBlock().getLocation());
+                    loc1 = e.getBlock().getLocation();
                     player.sendMessage(Component.text("Location1をセットしました").color(ColorSearch.Gold));
                 } else if(PlainComponentSerializer.plain().serialize(itemMeta.displayName()).equals("Location2")){
-                    plugin.getMallConfig().saveLocationsData("loc2",e.getBlock().getLocation());
                     e.setCancelled(true);
+                    loc2 = e.getBlock().getLocation();
                     player.sendMessage(Component.text("Location2をセットしました").color(ColorSearch.Gold));
                 }
             }
         }
     }
 
+    public LocationStructure getLocationStructure(String name){
+        if(loc1!=null && loc2!=null){
+            return new LocationStructure(name,loc1,loc2);
+        } else {
+            return null;
+        }
+    }
+
+    public void deInit(){
+        targetPlayer.getInventory().setItem(0,null);
+        targetPlayer.getInventory().setItem(1,null);
+        HandlerList.unregisterAll(this);
+    }
 }

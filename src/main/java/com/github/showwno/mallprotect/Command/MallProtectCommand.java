@@ -3,6 +3,8 @@ package com.github.showwno.mallprotect.Command;
 import com.github.showwno.mallprotect.Listener.PrepareEvent;
 import com.github.showwno.mallprotect.Listener.ProtectEvent;
 import com.github.showwno.mallprotect.MallProtect;
+import com.github.showwno.mallprotect.Util.ColorSearch;
+import com.github.showwno.mallprotect.Util.LocationStructure;
 import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -11,13 +13,11 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
-import org.bukkit.event.HandlerList;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BookMeta;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public class MallProtectCommand implements CommandExecutor, TabCompleter {
     private final MallProtect plugin;
@@ -39,20 +39,47 @@ public class MallProtectCommand implements CommandExecutor, TabCompleter {
         if (args.length > 0) {
             if (player.hasPermission("protect")) {
                 switch (args[0].toLowerCase()) {
-                    case "selector":
+                    case "select":
                         listener = new PrepareEvent(plugin, player);
+                        player.sendMessage(Component.text("選択したら、/selected <名前> で登録されます。"));
                         break;
-                    case "off":
-                        HandlerList.unregisterAll(listener);
-                        listener = null;
-                        player.sendMessage(Component.text("offにしました。"));
+                    case "registe":
+                        if(args.length == 2){
+                            plugin.getMallConfig().getLocationStructureList().add(listener.getLocationStructure(args[1]));
+                            player.sendMessage(Component.text("登録しました。"));
+                            listener.deInit();
+                            listener = null;
+                            plugin.reloadPlugin();
+                            player.sendMessage(Component.text("reloadしました。"));
+                        } else {
+                            player.sendMessage(Component.text("引数が違います。/selected <名前> で登録。"));
+                        }
                         break;
-                    case "reload":
-                        plugin.reloadPlugin();
-                        player.sendMessage(Component.text("reloadしました。"));
+                    case "remove":
+                        if(args.length == 2){
+                            boolean exist = false;
+                            for(LocationStructure ls : plugin.getMallConfig().getLocationStructureList()){
+                                if(ls.getName().equals(args[1])){
+                                    plugin.getMallConfig().getLocationStructureList().remove(ls);
+                                    exist = true;
+                                    break;
+                                }
+                            }
+                            if(exist){
+                                player.sendMessage(Component.text(args[1]+"を削除しました。"));
+                            } else {
+                                player.sendMessage(Component.text(args[1]+"は存在しませんでした。"));
+                            }
+                            plugin.reloadPlugin();
+                            player.sendMessage(Component.text("reloadしました。"));
+                            break;
+                        } else {
+                            player.sendMessage(Component.text("引数が違います。/selected <名前> で登録。"));
+                        }
                         break;
                     case "info":
-                        player.sendMessage(Component.text(plugin.getMallConfig().getLocationStructureList().toString()));
+                        plugin.getMallConfig().getLocationStructureList()
+                                .forEach(l -> player.sendMessage(Component.text(l.locationString()).color(ColorSearch.Aqua)));
                         break;
                 }
             } else {
@@ -67,7 +94,12 @@ public class MallProtectCommand implements CommandExecutor, TabCompleter {
         List<String> autoComplete = new ArrayList<>();
         if (sender.hasPermission("protect")) {
             if (args.length == 1) {//一段目
-                autoComplete.addAll(Arrays.asList("selector", "off", "help", "reload"));
+                autoComplete.addAll(Arrays.asList("select", "registe", "info","remove"));
+            } else if(args.length == 2){
+                if(args[0].equals("registe")){
+                    plugin.getMallConfig().getLocationStructureList()
+                            .forEach(l -> autoComplete.add(l.getName()));
+                }
             }
         }
         //文字比較と削除-----------------------------------------------------
