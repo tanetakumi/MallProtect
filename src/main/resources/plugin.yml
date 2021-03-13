@@ -4,6 +4,10 @@ main: com.github.showwno.mallprotect.MallProtect
 api-version: 1.13
 
 commands:
-  mallprotect:
-    aliases: mallp
-    permission: mallprotect
+  protect:
+    usage: /protect
+    description: hane server asist plugin
+
+  protect.*:
+    description: Gives access to all commands
+    default: op

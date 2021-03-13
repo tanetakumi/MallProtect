@@ -36,35 +36,38 @@ public class MallProtectCommand implements CommandExecutor, TabCompleter {
             return true;
         }
         Player player = (Player) sender;
-        if(args.length > 0){
-            if(player.hasPermission("protect")){
+        if (args.length > 0) {
+            if (player.hasPermission("protect")) {
                 switch (args[0].toLowerCase()) {
-                    case "debug":
-                        listener = new PrepareEvent(plugin,player);
+                    case "selector":
+                        listener = new PrepareEvent(plugin, player);
                         break;
                     case "off":
                         HandlerList.unregisterAll(listener);
                         listener = null;
+                        player.sendMessage(Component.text("offにしました。"));
                         break;
                     case "reload":
                         plugin.reloadPlugin();
+                        player.sendMessage(Component.text("reloadしました。"));
                         break;
                     case "info":
                         player.sendMessage(Component.text(plugin.getMallConfig().getLocationStructureList().toString()));
                         break;
                 }
-            } else{
+            } else {
                 player.sendMessage("権限がありません。");
             }
         }
         return true;
     }
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command cmd, String command, String[] args) {
         List<String> autoComplete = new ArrayList<>();
-        if(sender.hasPermission("protect")){
-            if (args.length == 1){//一段目
-                autoComplete.addAll(Arrays.asList("loc1","loc2","help","reload"));
+        if (sender.hasPermission("protect")) {
+            if (args.length == 1) {//一段目
+                autoComplete.addAll(Arrays.asList("selector", "off", "help", "reload"));
             }
         }
         //文字比較と削除-----------------------------------------------------
@@ -74,12 +77,12 @@ public class MallProtectCommand implements CommandExecutor, TabCompleter {
         return autoComplete;
     }
 
-    private int stringToInt(String str){
+    private int stringToInt(String str) {
         int x = -1;
-        try{
+        try {
             x = Integer.parseInt(str);
-        }
-        catch(Exception ignored){
+        } catch (Exception ignored) {
         }
         return x;
     }
+}
